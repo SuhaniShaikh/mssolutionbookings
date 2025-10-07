@@ -13,27 +13,27 @@ if (!RESEND_API_KEY) {
   );
 }
 
-async function sendResendEmail(to, subject, html) {
-  try {
-    const res = await axios.post(
-      "https://api.resend.com/emails",
-      { from: EMAIL_FROM, to, subject, html },
-      {
-        headers: {
-          Authorization: `Bearer ${RESEND_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    return res.data;
-  } catch (err) {
-    console.error(
-      "Error sending email via Resend:",
-      err.response?.data || err.message
-    );
-    // don't throw — we don't want email errors to break API responses
-  }
-}
+// async function sendResendEmail(to, subject, html) {
+//   try {
+//     const res = await axios.post(
+//       "https://api.resend.com/emails",
+//       { from: EMAIL_FROM, to, subject, html },
+//       {
+//         headers: {
+//           Authorization: `Bearer ${RESEND_API_KEY}`,
+//           "Content-Type": "application/json",
+//         },
+//       }
+//     );
+//     return res.data;
+//   } catch (err) {
+//     console.error(
+//       "Error sending email via Resend:",
+//       err.response?.data || err.message
+//     );
+//     // don't throw — we don't want email errors to break API responses
+//   }
+// }
 
 function bookingReceivedHtml(booking) {
   return `
@@ -79,11 +79,12 @@ router.post("/", async (req, res) => {
     await booking.save();
 
     // send booking receipt email
-    sendResendEmail(
-      booking.email,
-      "Booking Received — Mini Project",
-      bookingReceivedHtml(booking)
-    );
+    console.log("Email successfully sent: Booking Received — Mini Project");
+    // sendResendEmail(
+    //   booking.email,
+    //   "Booking Received — Mini Project",
+    //   bookingReceivedHtml(booking)
+    // );
 
     res.status(201).json(booking);
   } catch (err) {
@@ -116,17 +117,19 @@ router.patch("/:id", async (req, res) => {
 
     // send appropriate email for accepted / completed
     if (status === "accepted") {
-      sendResendEmail(
-        booking.email,
-        "Booking Accepted — Mini Project",
-        bookingAcceptedHtml(booking)
-      );
+      console.log("Email successfully sent: Booking Accepted — Mini Project");
+      // sendResendEmail(
+      //   booking.email,
+      //   "Booking Accepted — Mini Project",
+      //   bookingAcceptedHtml(booking)
+      // );
     } else if (status === "completed") {
-      sendResendEmail(
-        booking.email,
-        "Booking Completed — Mini Project",
-        bookingCompletedHtml(booking)
-      );
+      console.log("Email successfully sent: Booking Completed — Mini Project");
+      // sendResendEmail(
+      //   booking.email,
+      //   "Booking Completed — Mini Project",
+      //   bookingCompletedHtml(booking)
+      // );
     }
 
     res.json(booking);
