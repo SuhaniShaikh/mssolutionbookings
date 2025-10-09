@@ -35,6 +35,13 @@ const BookingPage = () => {
 
   const [selectedServicePrice, setSelectedServicePrice] = useState("");
   const [agreeToTerms, setAgreeToTerms] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [successData, setSuccessData] = useState({
+    service: "",
+    date: "",
+    time: "",
+    price: "",
+  });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -72,9 +79,18 @@ const BookingPage = () => {
         ...formData,
         price: selectedServicePrice,
       });
-      alert(
-        "Booking request submitted successfully! We will contact you soon."
-      );
+
+      // Store the data for success dialog before resetting
+      setSuccessData({
+        service: formData.service,
+        date: formData.date,
+        time: formData.time,
+        price: selectedServicePrice,
+      });
+
+      setShowSuccessDialog(true);
+
+      // Reset form after storing the data
       setFormData({
         name: "",
         email: "",
@@ -91,8 +107,55 @@ const BookingPage = () => {
     }
   };
 
+  const closeSuccessDialog = () => {
+    setShowSuccessDialog(false);
+  };
+
+  // Format date to be more readable
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-IN", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
   return (
     <div className="booking-page">
+      {/* Success Dialog */}
+      {showSuccessDialog && (
+        <div className="success-dialog-overlay">
+          <div className="success-dialog">
+            <div className="success-icon">✓</div>
+            <h2 className="success-title">Booking Confirmed!</h2>
+            <p className="success-message">
+              Your booking request has been submitted successfully. We've sent a
+              confirmation email with your booking details and status.
+            </p>
+            <div className="success-details">
+              <p>
+                <strong>Service:</strong> {successData.service}
+              </p>
+              <p>
+                <strong>Date:</strong> {formatDate(successData.date)}
+              </p>
+              <p>
+                <strong>Time:</strong> {successData.time}
+              </p>
+              <p>
+                <strong>Estimated Cost:</strong> {successData.price}
+              </p>
+            </div>
+            <button className="success-close-btn" onClick={closeSuccessDialog}>
+              Got It
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="booking-container">
         <div className="booking-header">
           <h1 className="booking-title">Book Your Service</h1>
@@ -221,6 +284,7 @@ const BookingPage = () => {
             </div>
 
             {/* Checkbox for price agreement */}
+            <div className="terms-checkbox">
               <label className="checkbox-label">
                 <input
                   type="checkbox"
@@ -232,6 +296,7 @@ const BookingPage = () => {
                 price may change based on actual diagnosis, part replacement
                 costs, and service complexity.
               </label>
+            </div>
 
             <button type="submit" className="booking-submit-btn">
               Book Appointment
