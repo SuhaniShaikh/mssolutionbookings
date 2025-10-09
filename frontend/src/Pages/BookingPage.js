@@ -5,11 +5,11 @@ import "../styles/booking.css";
 
 const BookingPage = () => {
   const services = [
-    "Laptop & Desktop Repair",
-    "Printer Repair & Toner Refill",
-    "School/Office Setup",
-    "Antivirus & OS Installations",
-    "AMC & Scheduled Maintenance",
+    { name: "Laptop & Desktop Repair", price: "₹499" },
+    { name: "Printer Repair & Toner Refill", price: "₹299" },
+    { name: "School/Office Setup", price: "₹1,999" },
+    { name: "Antivirus & OS Installations", price: "₹399" },
+    { name: "AMC & Scheduled Maintenance", price: "₹999/month" },
   ];
 
   const timeSlots = [
@@ -33,17 +33,45 @@ const BookingPage = () => {
     message: "",
   });
 
+  const [selectedServicePrice, setSelectedServicePrice] = useState("");
+  const [agreeToTerms, setAgreeToTerms] = useState(false);
+
   const handleChange = (e) => {
+    const { name, value } = e.target;
+
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
+
+    // Update price when service changes
+    if (name === "service") {
+      const selectedService = services.find(
+        (service) => service.name === value
+      );
+      setSelectedServicePrice(selectedService ? selectedService.price : "");
+    }
+  };
+
+  const handleCheckboxChange = (e) => {
+    setAgreeToTerms(e.target.checked);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!agreeToTerms) {
+      alert(
+        "Please agree to the price variation terms to proceed with booking."
+      );
+      return;
+    }
+
     try {
-      await axios.post("http://localhost:5000/api/bookings", formData);
+      await axios.post("http://localhost:5000/api/bookings", {
+        ...formData,
+        price: selectedServicePrice,
+      });
       alert(
         "Booking request submitted successfully! We will contact you soon."
       );
@@ -55,6 +83,8 @@ const BookingPage = () => {
         time: "",
         message: "",
       });
+      setSelectedServicePrice("");
+      setAgreeToTerms(false);
     } catch (error) {
       console.error("Error submitting booking:", error);
       alert("Error submitting booking. Please try again.");
@@ -117,12 +147,25 @@ const BookingPage = () => {
               >
                 <option value="">Choose a service</option>
                 {services.map((service, index) => (
-                  <option key={index} value={service}>
-                    {service}
+                  <option key={index} value={service.name}>
+                    {service.name} - {service.price}
                   </option>
                 ))}
               </select>
             </div>
+
+            {/* Display selected service price */}
+            {selectedServicePrice && (
+              <div className="price-display">
+                <p className="price-text">
+                  Service Cost:{" "}
+                  <span className="price-amount">{selectedServicePrice}</span>
+                </p>
+                <p className="price-note">
+                  *Final cost may vary based on actual service requirements
+                </p>
+              </div>
+            )}
 
             <div className="form-row">
               <div className="form-group">
@@ -176,6 +219,19 @@ const BookingPage = () => {
                 placeholder="Please provide your address details..."
               />
             </div>
+
+            {/* Checkbox for price agreement */}
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={agreeToTerms}
+                  onChange={handleCheckboxChange}
+                  className="checkbox-input"
+                />
+                <span className="checkmark"></span>I understand that the final
+                price may change based on actual diagnosis, part replacement
+                costs, and service complexity.
+              </label>
 
             <button type="submit" className="booking-submit-btn">
               Book Appointment
